@@ -17,3 +17,5 @@ wordpress/license.txt
 wordpress/readme.html
 wordpress/sitemap.xml
 wordpress/sitemap.xml.gz
+
+db/
