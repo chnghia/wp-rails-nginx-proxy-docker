@@ -1,10 +1,10 @@
 version: '3'
 
 services:
-  db:
+  mysql_db:
     image: mysql:latest
     volumes:
-      - ./db:/var/lib/mysql
+      - ./db/mysql:/var/lib/mysql
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: easytoguess
@@ -12,28 +12,43 @@ services:
       MYSQL_USER: wordpress
       MYSQL_PASSWORD: eveneasier
 
+  postgres_db:
+    image: postgres
+
   wordpress:
     depends_on:
-      - db
+      - mysql_db
     image: wordpress:latest
     restart: always
     volumes:
       - ./wordpress:/var/www/html
     environment:
-      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_HOST: mysql_db:3306
       WORDPRESS_DB_USER: wordpress
       WORDPRESS_DB_PASSWORD: eveneasier
       WORDPRESS_DB_NAME: wordpress
 
   phpmyadmin:
     depends_on:
-        - db
+        - mysql_db
     image: phpmyadmin/phpmyadmin
     environment:
-      PMA_HOST: db
+      PMA_HOST: mysql_db
       PMA_HOSTS: 3306
       PMA_USER: root
       PMA_PASSWORD: easytoguess
+
+  webapp:
+    build:
+      context: ./rails
+      dockerfile: ./rails/Dockerfile
+    command: bundle exec rails s -p 3000 -b '0.0.0.0'
+    volumes:
+      - ./rails:/var/www/webapp
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres_db
 
   nginx:
     depends_on:
